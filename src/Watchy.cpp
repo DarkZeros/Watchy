@@ -11,8 +11,11 @@ RTC_DATA_ATTR bool BLE_CONFIGURED;
 RTC_DATA_ATTR weatherData currentWeather;
 RTC_DATA_ATTR int weatherIntervalCounter = WEATHER_UPDATE_INTERVAL;
 RTC_DATA_ATTR bool displayFullInit = true;
+int started;
 
-Watchy::Watchy(){} //constructor
+Watchy::Watchy(){
+    started = millis();
+} //constructor
 
 void Watchy::init(String datetime){
     esp_sleep_wakeup_cause_t wakeup_reason;
@@ -27,6 +30,7 @@ void Watchy::init(String datetime){
     switch (wakeup_reason)
     {
         case ESP_SLEEP_WAKEUP_EXT0: //RTC Alarm
+            RTC.clearAlarm(); //resets the alarm flag in the RTC
             if(guiState == WATCHFACE_STATE){
                 RTC.read(currentTime);
                 showWatchFace(true); //partial updates on tick
@@ -46,22 +50,26 @@ void Watchy::init(String datetime){
 }
 
 void Watchy::displayBusyCallback(const void*){
-    gpio_wakeup_enable((gpio_num_t)BUSY, GPIO_INTR_LOW_LEVEL);
-    esp_sleep_enable_gpio_wakeup();
-    esp_light_sleep_start();
+  Serial.println("Lightsleeping"); Serial.flush();
+  gpio_wakeup_enable((gpio_num_t)BUSY, GPIO_INTR_LOW_LEVEL);
+  esp_sleep_enable_gpio_wakeup();
+  esp_light_sleep_start();
+  Serial.println("Lightsleeping done!"); Serial.flush();
 }
 
 void Watchy::deepSleep(){
-    display.hibernate();
-    displayFullInit = false; // Notify not to init it again    
-    RTC.clearAlarm(); //resets the alarm flag in the RTC
-     // Set pins 0-39 to input to avoid power leaking out
-    for(int i=0; i<40; i++) {
-        pinMode(i, INPUT);
-    }    
-    esp_sleep_enable_ext0_wakeup(RTC_PIN, 0); //enable deep sleep wake on RTC interrupt
-    esp_sleep_enable_ext1_wakeup(BTN_PIN_MASK, ESP_EXT1_WAKEUP_ANY_HIGH); //enable deep sleep wake on button press
-    esp_deep_sleep_start();
+  display.hibernate();
+  displayFullInit = false; // Notify not to init it again
+  RTC.clearAlarm(); //resets the alarm flag in the RTC
+  // Set pins 0-39 to input to avoid power leaking out
+  for(int i=0; i<40; i++) {
+    pinMode(i, INPUT);
+  }  
+  Serial.print("Elapsed ");
+  Serial.println(millis() - started);
+  esp_sleep_enable_ext0_wakeup(RTC_PIN, 0); //enable deep sleep wake on RTC interrupt
+  esp_sleep_enable_ext1_wakeup(BTN_PIN_MASK, ESP_EXT1_WAKEUP_ANY_HIGH); //enable deep sleep wake on button press
+  esp_deep_sleep_start();
 }
 
 void Watchy::handleButtonPress(){
@@ -668,10 +676,12 @@ void Watchy::_bmaConfig(){
         - BMA4_CIC_AVG_MODE
         - BMA4_CONTINUOUS_MODE
     */
-    cfg.perf_mode = BMA4_CONTINUOUS_MODE;
+    cfg.perf_mode = 0;//BMA4_CONTINUOUS_MODE;
 
     // Configure the BMA423 accelerometer
     sensor.setAccelConfig(cfg);
+    //sensor.shutDown();
+    return;
 
     // Enable BMA423 accelerometer
     // Warning : Need to use feature, you must first enable the accelerometer

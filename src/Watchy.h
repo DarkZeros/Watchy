@@ -19,10 +19,16 @@ typedef struct weatherData{
     int16_t weatherConditionCode;
 }weatherData;
 
+//#define COLOR_DISPLAY
+
 class Watchy {
     public:
         static WatchyRTC RTC;
+        #ifndef COLOR_DISPLAY
         static GxEPD2_BW<GxEPD2_154_D67, GxEPD2_154_D67::HEIGHT> display;
+        #else
+        static GxEPD2_3C<GxEPD2_154_Z90c, GxEPD2_154_Z90c::HEIGHT> display;
+        #endif
         tmElements_t currentTime;
     public:
         Watchy();
