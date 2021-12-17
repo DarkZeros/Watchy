@@ -109,6 +109,7 @@ void Watchy::handleButtonPress(){
   //Back Button
   else if (wakeupBit & BACK_BTN_MASK){
     if(guiState == MAIN_MENU_STATE){//exit to watch face if already in menu
+        RTC.clearAlarm(); //resets the alarm flag in the RTC
         RTC.read(currentTime);
         showWatchFace(false);
     }else if(guiState == APP_STATE){
@@ -187,6 +188,7 @@ void Watchy::handleButtonPress(){
           }else if(digitalRead(BACK_BTN_PIN) == 1){
             lastTimeout = millis();
             if(guiState == MAIN_MENU_STATE){//exit to watch face if already in menu
+            RTC.clearAlarm(); //resets the alarm flag in the RTC
             RTC.read(currentTime);
             showWatchFace(false);
             break; //leave loop
@@ -242,7 +244,7 @@ void Watchy::showMenu(byte menuIndex, bool partialRefresh){
     }   
     }
 
-    display.display(partialRefresh);
+    display.display(true);
 
     guiState = MAIN_MENU_STATE;    
 }
@@ -287,7 +289,7 @@ void Watchy::showBattery(){
     display.setCursor(70, 80);
     display.print(voltage);
     display.println("V");
-    display.display(false); //full refresh
+    display.display(true); //full refresh
 
     guiState = APP_STATE;      
 }
@@ -299,7 +301,7 @@ void Watchy::showBuzz(){
     display.setTextColor(GxEPD_WHITE);
     display.setCursor(70, 80);
     display.println("Buzz!");
-    display.display(false); //full refresh
+    display.display(true); //full refresh
     vibMotor();
     showMenu(menuIndex, false);    
 }
@@ -544,7 +546,7 @@ void Watchy::showAccelerometer(){
 void Watchy::showWatchFace(bool partialRefresh){
   display.setFullWindow();
   drawWatchFace();
-  display.display(partialRefresh); //partial refresh
+  display.display(true); //partial refresh
   guiState = WATCHFACE_STATE;
 }
 
@@ -741,7 +743,7 @@ void Watchy::setupWifi(){
     display.println("Connected to");
     display.println(WiFi.SSID());
   }
-  display.display(false); //full refresh
+  display.display(true); //full refresh
   //turn off radios
   WiFi.mode(WIFI_OFF);
   btStop();
@@ -760,7 +762,7 @@ void Watchy::_configModeCallback (WiFiManager *myWiFiManager) {
   display.println(WIFI_AP_SSID);
   display.print("IP: ");
   display.println(WiFi.softAPIP());
-  display.display(false); //full refresh
+  display.display(true); //full refresh
 }
 
 bool Watchy::connectWiFi(){
@@ -794,7 +796,7 @@ void Watchy::showUpdateFW(){
     display.println("again when ready");
     display.println(" ");
     display.println("Keep USB powered");
-    display.display(false); //full refresh
+    display.display(true); //full refresh
 
     guiState = FW_UPDATE_STATE;  
 }
@@ -811,7 +813,7 @@ void Watchy::updateFWBegin(){
     display.println(" ");
     display.println("Waiting for");
     display.println("connection...");
-    display.display(false); //full refresh
+    display.display(true); //full refresh
 
     BLE BT;
     BT.begin("Watchy BLE OTA");
@@ -831,7 +833,7 @@ void Watchy::updateFWBegin(){
         display.println(" ");
         display.println("Waiting for");
         display.println("upload...");
-        display.display(false); //full refresh
+        display.display(true); //full refresh
         }
         if(currentStatus == 1){
         display.setFullWindow();
@@ -856,7 +858,7 @@ void Watchy::updateFWBegin(){
         display.println("completed!");
         display.println(" ");
         display.println("Rebooting...");
-        display.display(false); //full refresh
+        display.display(true); //full refresh
 
         delay(2000);
         esp_restart();           
@@ -870,7 +872,7 @@ void Watchy::updateFWBegin(){
         display.println("BLE Disconnected!");
         display.println(" ");
         display.println("exiting...");
-        display.display(false); //full refresh
+        display.display(true); //full refresh
         delay(1000);
         break;
         }
