@@ -1,7 +1,12 @@
 #include "Watchy.h"
 
-WatchyRTC Watchy::RTC; 
+WatchyRTC Watchy::RTC;
+
+#ifndef COLOR_DISPLAY
 GxEPD2_BW<GxEPD2_154_D67, GxEPD2_154_D67::HEIGHT> Watchy::display(GxEPD2_154_D67(CS, DC, RESET, BUSY));
+#else
+GxEPD2_3C<GxEPD2_154_Z90c, GxEPD2_154_Z90c::HEIGHT> Watchy::display(GxEPD2_154_Z90c(CS, DC, RESET, BUSY));
+#endif
 
 RTC_DATA_ATTR int guiState;
 RTC_DATA_ATTR int menuIndex;

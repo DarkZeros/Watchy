@@ -6,6 +6,7 @@
 #include <HTTPClient.h>
 #include <Arduino_JSON.h>
 #include <GxEPD2_BW.h>
+#include <GxEPD2_3C.h>
 #include <Wire.h>
 #include <Fonts/FreeMonoBold9pt7b.h>
 #include "DSEG7_Classic_Bold_53.h"
@@ -19,7 +20,7 @@ typedef struct weatherData{
     int16_t weatherConditionCode;
 }weatherData;
 
-//#define COLOR_DISPLAY
+#define COLOR_DISPLAY
 
 class Watchy {
     public:
