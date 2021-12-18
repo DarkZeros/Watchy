@@ -29,9 +29,9 @@ void Watchy::init(String datetime){
     RTC.init();
 
     // Init the display here for all cases, if unused, it will do nothing
-    display.init(0, displayFullInit, 10, true); // 10ms by spec, and fast pulldown reset
+    display.init(460800, displayFullInit, 10, true); // 10ms by spec, and fast pulldown reset
     display.epd2.setBusyCallback(displayBusyCallback);
-
+    
     switch (wakeup_reason)
     {
         case ESP_SLEEP_WAKEUP_EXT0: //RTC Alarm
@@ -69,7 +69,7 @@ void Watchy::deepSleep(){
   // Set pins 0-39 to input to avoid power leaking out
   for(int i=0; i<40; i++) {
     pinMode(i, INPUT);
-  }  
+  }
   Serial.print("Elapsed ");
   Serial.println(millis() - started);
   esp_sleep_enable_ext0_wakeup(RTC_PIN, 0); //enable deep sleep wake on RTC interrupt
@@ -284,7 +284,52 @@ void Watchy::showFastMenu(byte menuIndex){
 }
 
 void Watchy::showBattery(){
-    display.setFullWindow();
+  display.setFullWindow();
+  display.setFont(&FreeMonoBold9pt7b);
+  display.setTextColor(GxEPD_BLACK);
+  int16_t tbx, tby; uint16_t tbw, tbh;
+  const char str1[] = "Hola Elena!";
+  display.getTextBounds(str1, 0, 0, &tbx, &tby, &tbw, &tbh);
+  // center bounding box by transposition of origin:
+  uint16_t x = ((display.width() - tbw) / 2) - tbx;
+  uint16_t y = ((display.height() - tbh) / 4) - tby;
+    uint16_t B = GxEPD_BLACK;
+  uint16_t W = GxEPD_WHITE;
+  uint16_t R = GxEPD_RED;
+  uint16_t data[16][16] = {
+    W,W,W,W,W,W,W,W,W,W,W,W,W,W,W,W,
+    W,W,B,B,B,B,W,W,W,B,B,B,B,W,W,W,
+    W,B,R,R,R,R,B,W,B,R,R,R,R,B,W,W,
+    B,R,R,W,W,R,R,B,R,R,R,R,R,R,B,W,
+    B,R,W,W,R,R,R,R,R,R,R,R,R,R,B,W,
+    B,R,W,R,R,R,R,R,R,R,R,R,R,R,B,W,
+    B,R,R,R,R,R,R,R,R,R,R,R,R,R,B,W,
+    W,B,R,R,R,R,R,R,R,R,R,R,R,B,W,W,
+    W,W,B,R,R,R,R,R,R,R,R,R,B,W,W,W,
+    W,W,W,B,R,R,R,R,R,R,R,B,W,W,W,W,
+    W,W,W,W,B,R,R,R,R,R,B,W,W,W,W,W,
+    W,W,W,W,W,B,R,R,R,B,W,W,W,W,W,W,
+    W,W,W,W,W,W,B,R,B,W,W,W,W,W,W,W,
+    W,W,W,W,W,W,W,B,W,W,W,W,W,W,W,W,
+    W,W,W,W,W,W,W,W,W,W,W,W,W,W,W,W,
+    };
+    display.fillScreen(GxEPD_WHITE);
+    display.setCursor(x, y);
+    display.print("Dani");
+    display.setTextColor(GxEPD_BLACK);    
+    display.print("<3");
+    display.setTextColor(GxEPD_RED);
+    display.print("Elena");
+    display.setTextColor(GxEPD_BLACK);
+    display.print("");
+    for(int x=0; x<16; x++)
+      for(int y=0; y<16; y++)
+        for(int xx=0; xx<8; xx++)
+          for(int yy=0; yy<8; yy++)
+            display.drawPixel(36+x*8+xx, 80+y*8+yy, data[y][x]);
+    display.display(false); //full refresh
+    display.hibernate();
+    /*display.setFullWindow();
     display.fillScreen(GxEPD_BLACK);
     display.setFont(&FreeMonoBold9pt7b);
     display.setTextColor(GxEPD_WHITE);
@@ -294,7 +339,7 @@ void Watchy::showBattery(){
     display.setCursor(70, 80);
     display.print(voltage);
     display.println("V");
-    display.display(true); //full refresh
+    display.display(true); //full refresh*/
 
     guiState = APP_STATE;      
 }
