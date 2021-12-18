@@ -146,7 +146,7 @@ void Watchy::handleButtonPress(){
   }
   
   /***************** fast menu *****************/
-  bool timeout = false;
+ /* bool timeout = false;
   long lastTimeout = millis();
   pinMode(MENU_BTN_PIN, INPUT);
   pinMode(BACK_BTN_PIN, INPUT);
@@ -217,7 +217,7 @@ void Watchy::handleButtonPress(){
             }         
           }
       }
-  }
+  }*/
 }
 
 void Watchy::showMenu(byte menuIndex, bool partialRefresh){
