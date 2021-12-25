@@ -7,8 +7,11 @@ const uint8_t BATTERY_SEGMENT_HEIGHT = 11;
 const uint8_t BATTERY_SEGMENT_SPACING = 9;
 const uint8_t WEATHER_ICON_WIDTH = 48;
 const uint8_t WEATHER_ICON_HEIGHT = 32;
+int startTime = 0;
 
-Watchy7SEG::Watchy7SEG(){} //constructor
+Watchy7SEG::Watchy7SEG(){
+    startTime = millis();
+} //constructor
 
 void Watchy7SEG::drawWatchFace(){
     display.fillScreen(DARKMODE ? GxEPD_BLACK : GxEPD_WHITE);
@@ -25,13 +28,31 @@ void Watchy7SEG::drawWatchFace(){
         display.drawBitmap(100, 75, bluetooth, 13, 21, DARKMODE ? GxEPD_WHITE : GxEPD_BLACK);
     }
 }
-
+RTC_DATA_ATTR int batCounter = 0;
+RTC_DATA_ATTR int batPrev = 0;
+RTC_DATA_ATTR int batAcc = 0;
+RTC_DATA_ATTR int batTrend = 0;
+const int MAX_AVERAGE = 120;
 void Watchy7SEG::drawExtra() {
     display.setFont(&Seven_Segment10pt7b);
-    display.setCursor(0, 180);
+    display.setCursor(0, 170);
 
-    display.print(getBatteryVoltage()*1000);
-    display.println("mV");
+    if (batCounter < MAX_AVERAGE){
+        batCounter++;
+    }else{
+        batAcc *= (1 - 1.f/MAX_AVERAGE);
+        batTrend *= (1 - 1.f/MAX_AVERAGE);       
+    }
+    int bat = (int)(getBatteryVoltage()*1000);
+    batTrend += bat - batPrev;
+    batAcc += bat;
+    batPrev = bat;
+
+    display.print(batAcc * 1.0 / batCounter);
+    display.print(" ");
+    display.print(batTrend * 10 * 1.0 / batCounter);
+    display.print("uA ");
+    display.print(millis() - startTime);
 }
 //#include "circular_buffer.hpp"
 //RTC_DATA_ATTR jm::circular_buffer<float, 512> batteryData;

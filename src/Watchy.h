@@ -20,7 +20,7 @@ typedef struct weatherData{
     int16_t weatherConditionCode;
 }weatherData;
 
-#define COLOR_DISPLAY
+//#define COLOR_DISPLAY
 
 class Watchy {
     public:
