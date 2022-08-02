@@ -16,6 +16,7 @@
 
 #include "Display.h"
 #include "config.h"
+#include "driver/gpio.h"
 
 RTC_DATA_ATTR bool displayFullInit       = true;
 

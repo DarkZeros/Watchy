@@ -11,7 +11,7 @@
 #pragma message "Hardware revision is not defined at the project level, please define in config.h. Defaulting to ARDUINO_WATCHY_V20"
 
 //Change to your board version
-#define ARDUINO_WATCHY_V20
+#define ARDUINO_WATCHY_V10
 
 #define MENU_BTN_PIN 26
 #define BACK_BTN_PIN 25
@@ -28,24 +28,24 @@
 #if defined (ARDUINO_WATCHY_V10)
     #define UP_BTN_PIN 32
     #define BATT_ADC_PIN 33
-    #define UP_BTN_MASK  GPIO_SEL_32
+    #define UP_BTN_MASK (1<<GPIO_NUM_32)
     #define RTC_TYPE 1 //DS3231
 #elif defined (ARDUINO_WATCHY_V15)
     #define UP_BTN_PIN 32
     #define BATT_ADC_PIN 35
-    #define UP_BTN_MASK  GPIO_SEL_32
+    #define UP_BTN_MASK (1<<GPIO_NUM_32)
     #define RTC_TYPE 2 //PCF8563
 #elif defined (ARDUINO_WATCHY_V20)
     #define UP_BTN_PIN 35
     #define BATT_ADC_PIN 34
-    #define UP_BTN_MASK  GPIO_SEL_35
+    #define UP_BTN_MASK (1<<GPIO_NUM_35)
     #define RTC_TYPE 2 //PCF8563
 #endif
 
-#define MENU_BTN_MASK GPIO_SEL_26
-#define BACK_BTN_MASK GPIO_SEL_25
-#define DOWN_BTN_MASK GPIO_SEL_4
-#define ACC_INT_MASK  GPIO_SEL_14
+#define MENU_BTN_MASK (1<<GPIO_NUM_26)
+#define BACK_BTN_MASK (1<<GPIO_NUM_25)
+#define DOWN_BTN_MASK (1<<GPIO_NUM_4)
+#define ACC_INT_MASK  (1<<GPIO_NUM_14)
 #define BTN_PIN_MASK  MENU_BTN_MASK|BACK_BTN_MASK|UP_BTN_MASK|DOWN_BTN_MASK
 
 #endif
