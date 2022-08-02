@@ -640,17 +640,19 @@ weatherData Watchy::getWeatherData(String cityID, String units, String lang,
       http.begin(weatherQueryURL.c_str());
       int httpResponseCode = http.GET();
       if (httpResponseCode == 200) {
-        String payload             = http.getString();
-        JSONVar responseObject     = JSON.parse(payload);
-        currentWeather.temperature = int(responseObject["main"]["temp"]);
-        currentWeather.weatherConditionCode =
-            int(responseObject["weather"][0]["id"]);
-        currentWeather.weatherDescription =
-	  JSONVar::stringify(responseObject["weather"][0]["main"]);
-	    currentWeather.external = true;
-        // sync NTP during weather API call and use timezone of city
-        gmtOffset = int(responseObject["timezone"]);
-        syncNTP(gmtOffset);
+        String payload = http.getString();
+        DynamicJsonDocument doc(1024);
+        if (auto error = deserializeJson(doc, payload)) {
+          Serial.println(error.c_str());
+        } else {
+          currentWeather.temperature = doc["main"]["temp"].as<int>();
+          currentWeather.isMetric = settings.weatherUnit == String("metric");
+          currentWeather.weatherConditionCode = doc["weather"][0]["id"].as<int16_t>();
+          currentWeather.weatherDescription = doc["weather"][0]["main"].as<String>();
+          currentWeather.external = true;
+          gmtOffset = doc["timezone"].as<int>();
+          syncNTP(gmtOffset);
+        }
       } else {
         // http error
       }
