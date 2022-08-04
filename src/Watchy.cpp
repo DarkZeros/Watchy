@@ -12,8 +12,10 @@ RTC_DATA_ATTR bool BLE_CONFIGURED;
 RTC_DATA_ATTR weatherData currentWeather;
 RTC_DATA_ATTR int weatherIntervalCounter = -1;
 RTC_DATA_ATTR bool displayFullInit       = true;
+int started;
 
 void Watchy::init(String datetime) {
+  started = millis();
   esp_sleep_wakeup_cause_t wakeup_reason;
   wakeup_reason = esp_sleep_get_wakeup_cause(); // get wake up reason
   Wire.begin(SDA, SCL);                         // init i2c
@@ -69,6 +71,8 @@ void Watchy::deepSleep() {
   esp_sleep_enable_ext1_wakeup(
       BTN_PIN_MASK,
       ESP_EXT1_WAKEUP_ANY_HIGH); // enable deep sleep wake on button press
+  Serial.print("Elapsed ");
+  Serial.println(millis() - started);
   esp_deep_sleep_start();
 }
 
@@ -149,7 +153,7 @@ void Watchy::handleButtonPress() {
   }
 
   /***************** fast menu *****************/
-  bool timeout     = false;
+  /*bool timeout     = false;
   long lastTimeout = millis();
   pinMode(MENU_BTN_PIN, INPUT);
   pinMode(BACK_BTN_PIN, INPUT);
@@ -223,7 +227,7 @@ void Watchy::handleButtonPress() {
         }
       }
     }
-  }
+  }*/
 }
 
 void Watchy::showMenu(byte menuIndex, bool partialRefresh) {
@@ -253,7 +257,7 @@ void Watchy::showMenu(byte menuIndex, bool partialRefresh) {
     }
   }
 
-  display.display(partialRefresh);
+  display.display(true);
 
   guiState = MAIN_MENU_STATE;
 }
@@ -567,7 +571,7 @@ void Watchy::showAccelerometer() {
 void Watchy::showWatchFace(bool partialRefresh) {
   display.setFullWindow();
   drawWatchFace();
-  display.display(partialRefresh); // partial refresh
+  display.display(true); // partial refresh
   guiState = WATCHFACE_STATE;
 }
 
@@ -722,10 +726,11 @@ void Watchy::_bmaConfig() {
       - BMA4_CIC_AVG_MODE
       - BMA4_CONTINUOUS_MODE
   */
-  cfg.perf_mode = BMA4_CONTINUOUS_MODE;
+  cfg.perf_mode = 0;//BMA4_CONTINUOUS_MODE;
 
   // Configure the BMA423 accelerometer
   sensor.setAccelConfig(cfg);
+  return;
 
   // Enable BMA423 accelerometer
   // Warning : Need to use feature, you must first enable the accelerometer

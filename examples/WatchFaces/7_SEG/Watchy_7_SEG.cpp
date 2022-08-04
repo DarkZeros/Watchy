@@ -1,6 +1,6 @@
 #include "Watchy_7_SEG.h"
 
-#define DARKMODE true
+#define DARKMODE false
 
 const uint8_t BATTERY_SEGMENT_WIDTH = 7;
 const uint8_t BATTERY_SEGMENT_HEIGHT = 11;
@@ -8,13 +8,79 @@ const uint8_t BATTERY_SEGMENT_SPACING = 9;
 const uint8_t WEATHER_ICON_WIDTH = 48;
 const uint8_t WEATHER_ICON_HEIGHT = 32;
 
+int startTime = 0;
+ 
+Watchy7SEG::Watchy7SEG(const watchySettings& settings) : Watchy(settings){
+    startTime = millis();
+}
+
+RTC_DATA_ATTR int batCounter = 0;
+RTC_DATA_ATTR int batPrev = 0;
+RTC_DATA_ATTR int batAcc = 0;
+RTC_DATA_ATTR int batTrend = 0;
+const int MAX_AVERAGE = 120;
+void Watchy7SEG::drawExtra() {
+    display.setFont(&Seven_Segment10pt7b);
+    display.setCursor(0, 170);
+ 
+    if (batCounter < MAX_AVERAGE){
+        batCounter++;
+    }else{
+        batAcc *= (1 - 1.f/MAX_AVERAGE);
+        batTrend *= (1 - 1.f/MAX_AVERAGE);       
+    }
+    int bat = (int)(getBatteryVoltage()*1000);
+    batTrend += bat - batPrev;
+    batAcc += bat;
+    batPrev = bat;
+
+    display.print(batAcc * 1.0 / batCounter);
+    display.print(" ");
+    display.print(batTrend * 10 * 1.0 / batCounter);
+    display.print("uA ");
+    display.print(millis() - startTime);
+}
+//#include "circular_buffer.hpp"
+//RTC_DATA_ATTR jm::circular_buffer<float, 512> batteryData;
+void Watchy7SEG::drawBatteryTrend() {
+/*    batteryData.emplace_back(getBatteryVoltage()*1000); //mV
+    if (batteryData.size() > 500)
+        batteryData.pop_front();
+    // Compute the upper average
+    // Compute lower average
+    float up = 0, down = 0;
+    auto it=batteryData.begin();
+    for (int i=0; i<batteryData.size(); i++, it++)
+        if (i < batteryData.size()/2)
+            up += *it;
+        else
+            down += *it;
+    up /= batteryData.size()/2;
+    down /= batteryData.size()/2 + batteryData.size() % 2;
+    float trend = down - up;
+
+    //mV/minute -> mA -> uA
+    trend = trend / batteryData.size() * 2 / 1.2 * 200 / 60 * 1000; // Convert to uA given 3V-4.2V battery with 200mAh
+
+    display.setCursor(0, 190);
+    display.print(trend);
+    display.print("uA ");
+    display.println(batteryData.size());*/
+    /*display.setCursor(0, 190);
+    display.print(getBatteryVoltage()*1000);
+    display.print("mV ");
+    display.println(batteryData.size());*/
+}
+
 void Watchy7SEG::drawWatchFace(){
     display.fillScreen(DARKMODE ? GxEPD_BLACK : GxEPD_WHITE);
     display.setTextColor(DARKMODE ? GxEPD_WHITE : GxEPD_BLACK);
     drawTime();
     drawDate();
-    drawSteps();
-    drawWeather();
+    //drawBatteryTrend();
+    //drawSteps();
+    drawExtra();
+    //drawWeather();
     drawBattery();
     display.drawBitmap(120, 77, WIFI_CONFIGURED ? wifi : wifioff, 26, 18, DARKMODE ? GxEPD_WHITE : GxEPD_BLACK);
     if(BLE_CONFIGURED){

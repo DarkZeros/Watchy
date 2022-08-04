@@ -11,10 +11,13 @@
 class Watchy7SEG : public Watchy{
     using Watchy::Watchy;
     public:
+        Watchy7SEG(const watchySettings& settings);
         void drawWatchFace();
         void drawTime();
         void drawDate();
+        void drawBatteryTrend();
         void drawSteps();
+        void drawExtra();
         void drawWeather();
         void drawBattery();
 };
