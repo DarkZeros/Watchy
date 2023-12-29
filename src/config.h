@@ -3,7 +3,7 @@
 
 // Versioning
 #define WATCHY_LIB_VER "1.4.7"
-
+#define ARDUINO_WATCHY_V10
 //pins
 #if !defined(ARDUINO_WATCHY_V10) && !defined(ARDUINO_WATCHY_V15) && !defined(ARDUINO_WATCHY_V20)
 
