@@ -13,13 +13,16 @@ void Watchy7SEG::drawWatchFace(){
     display.setTextColor(DARKMODE ? GxEPD_WHITE : GxEPD_BLACK);
     drawTime();
     drawDate();
-    drawSteps();
-    drawWeather();
-    drawBattery();
-    display.drawBitmap(120, 77, WIFI_CONFIGURED ? wifi : wifioff, 26, 18, DARKMODE ? GxEPD_WHITE : GxEPD_BLACK);
-    if(BLE_CONFIGURED){
-        display.drawBitmap(100, 75, bluetooth, 13, 21, DARKMODE ? GxEPD_WHITE : GxEPD_BLACK);
-    }
+    // drawSteps();
+    // drawWeather();
+    // drawBattery();
+    // display.drawBitmap(120, 77, WIFI_CONFIGURED ? wifi : wifioff, 26, 18, DARKMODE ? GxEPD_WHITE : GxEPD_BLACK);
+    // if(BLE_CONFIGURED){
+    //     display.drawBitmap(100, 75, bluetooth, 13, 21, DARKMODE ? GxEPD_WHITE : GxEPD_BLACK);
+    // }
+    display.drawCircle(150, 100, 28, GxEPD_BLACK);
+    display.fillCircle(150, 100, 25, GxEPD_BLACK);
+    //display.fillCircleHelper(150, 100, 25, 0b0011, 10, GxEPD_WHITE);
 }
 
 void Watchy7SEG::drawTime(){
