@@ -17,8 +17,8 @@
 #define BACK_BTN_PIN 25
 #define DOWN_BTN_PIN 4
 #define DISPLAY_CS 5
-#define DISPLAY_RES 9
-#define DISPLAY_DC 10
+#define DISPLAY_RES 10
+#define DISPLAY_DC 9
 #define DISPLAY_BUSY 19
 #define ACC_INT_1_PIN 14
 #define ACC_INT_2_PIN 12
