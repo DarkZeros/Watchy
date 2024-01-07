@@ -18,22 +18,27 @@ RTC_DATA_ATTR tmElements_t bootTime;
 void Watchy::init(String datetime) {
   esp_sleep_wakeup_cause_t wakeup_reason;
   wakeup_reason = esp_sleep_get_wakeup_cause(); // get wake up reason
-  Wire.begin(SDA, SCL);                         // init i2c
-  RTC.init();
+  //Wire.begin(SDA, SCL);                         // init i2c
+  //RTC.init();
+
+  struct timeval tv;
+  gettimeofday(&tv, NULL);
+  breakTime(tv.tv_sec, currentTime);
 
   // Init the display since is almost sure we will use it
   display.epd2.initWatchy();
 
   switch (wakeup_reason) {
+  case ESP_SLEEP_WAKEUP_TIMER: // RTC Timer
   case ESP_SLEEP_WAKEUP_EXT0: // RTC Alarm
-    RTC.read(currentTime);
+    //RTC.read(currentTime);
     switch (guiState) {
     case WATCHFACE_STATE:
       showWatchFace(true); // partial updates on tick
       if (settings.vibrateOClock) {
         if (currentTime.Minute == 0) {
           // The RTC wakes us up once per minute
-          vibMotor(75, 4);
+          //vibMotor(75, 4);
         }
       }
       break;
@@ -52,13 +57,13 @@ void Watchy::init(String datetime) {
     handleButtonPress();
     break;
   default: // reset
-    RTC.config(datetime);
-    _bmaConfig();
+    //RTC.config(datetime);
+    //_bmaConfig();
     gmtOffset = settings.gmtOffset;
-    RTC.read(currentTime);
-    RTC.read(bootTime);
+    //RTC.read(currentTime);
+    //RTC.read(bootTime);
     showWatchFace(false); // full update on reset
-    vibMotor(75, 4);
+    //vibMotor(75, 4);
     // For some reason, seems to be enabled on first boot
     esp_sleep_disable_wakeup_source(ESP_SLEEP_WAKEUP_ALL);
     break;
@@ -67,7 +72,7 @@ void Watchy::init(String datetime) {
 }
 void Watchy::deepSleep() {
   display.hibernate();
-  RTC.clearAlarm();        // resets the alarm flag in the RTC
+  //RTC.clearAlarm();        // resets the alarm flag in the RTC
 
   // Set GPIOs 0-39 to input to avoid power leaking out
   const uint64_t ignore = 0b11110001000000110000100111000010; // Ignore some GPIOs due to resets
@@ -76,11 +81,12 @@ void Watchy::deepSleep() {
       continue;
     pinMode(i, INPUT);
   }
-  esp_sleep_enable_ext0_wakeup((gpio_num_t)RTC_INT_PIN,
-                               0); // enable deep sleep wake on RTC interrupt
-  esp_sleep_enable_ext1_wakeup(
-      BTN_PIN_MASK,
-      ESP_EXT1_WAKEUP_ANY_HIGH); // enable deep sleep wake on button press
+  // esp_sleep_enable_ext0_wakeup((gpio_num_t)RTC_INT_PIN,
+  //                              0); // enable deep sleep wake on RTC interrupt
+  // esp_sleep_enable_ext1_wakeup(
+  //     BTN_PIN_MASK,
+  //     ESP_EXT1_WAKEUP_ANY_HIGH); // enable deep sleep wake on button press
+  esp_sleep_enable_timer_wakeup(10 * 1000000);
   esp_deep_sleep_start();
 }
 
