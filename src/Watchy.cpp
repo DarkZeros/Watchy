@@ -66,6 +66,23 @@ void Watchy::init(String datetime) {
     //vibMotor(75, 4);
     // For some reason, seems to be enabled on first boot
     esp_sleep_disable_wakeup_source(ESP_SLEEP_WAKEUP_ALL);
+    // Set V2.9
+      gpio_config_t io_conf = {};
+      //disable interrupt
+      io_conf.intr_type = GPIO_INTR_DISABLE;
+      //set as output mode
+      io_conf.mode = GPIO_MODE_OUTPUT;
+      //bit mask of the pins that you want to set,e.g.GPIO18/19
+      io_conf.pin_bit_mask = (1ULL<<13);
+      //disable pull-down mode
+      io_conf.pull_down_en = GPIO_PULLDOWN_DISABLE;
+      //disable pull-up mode
+      io_conf.pull_up_en = GPIO_PULLUP_DISABLE;
+      //configure GPIO with the given settings
+      gpio_config(&io_conf);
+      gpio_set_level((gpio_num_t)13, 1);
+      gpio_hold_en((gpio_num_t)13);
+      gpio_deep_sleep_hold_en();
     break;
   }
   deepSleep();
