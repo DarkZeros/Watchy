@@ -4,7 +4,8 @@
 // based on Demo Example from Good Display, available here: http://www.e-paper-display.com/download_detail/downloadsId=806.html
 // Panel: GDEH0154D67 : http://www.e-paper-display.com/products_detail/productId=455.html
 // Controller : SSD1681 : http://www.e-paper-display.com/download_detail/downloadsId=825.html
-//
+// Controller : SSD1608 : https://v4.cecdn.yun300.cn/100001_1909185148/SSD1608-1.pdf
+
 // Author: Jean-Marc Zingg
 //
 // Version: see library.properties
@@ -486,6 +487,53 @@ void WatchyDisplay::_Update_Full()
 void WatchyDisplay::_Update_Part()
 {
   _startTransfer();
+  if (false) {
+    /*_transferCommand(0x33); // Read LUT
+    unsigned char lut_partial_update_real[] =
+    {
+        0x10, 0x18, 0x18, 0x08, 0x18, 0x18, 0x08, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x13, 0x14, 0x44, 0x12, 0x00, 
+        0x00, 0x00, 0x00, 
+        0x00, 0x00
+    };
+    SPI.transferBytes(NULL, lut_partial_update_real, 30);
+    for (int i=0; i<30; i++) {
+      ESP_LOGE("LUT", "%02x", lut_partial_update_real[i]);
+    }*/
+    _transferCommand(0x32); // Write LUT
+    /*for (int i=0; i<10; i++) { // Black LUT
+      _transfer(0x00);
+    }
+    for (int i=0; i<10; i++) { // White LUT
+      _transfer(0xFF);
+    }
+    for (int i=0; i<10*3; i++) { // Colour LUT
+      _transfer(0x00);
+    }
+    for (int i=0; i<10; i++) { // Phases length + Repeats
+      _transfer(0x00); // A
+      _transfer(0x00); // B
+      _transfer(0x00); // C
+      _transfer(0x00); // D
+      _transfer(0x00); // RP
+    }*/
+    const unsigned char lut_full_update[] =
+    {
+        0x02, 0x02, 0x01, 0x11, 0x12, 0x12, 0x22, 0x22, 0x66, 0x69,
+        0x69, 0x59, 0x58, 0x99, 0x99, 0x88, 0x00, 0x00, 0x00, 0x00,
+        //0xF8, 0xB4, 0x13, 0x51, 0x35, 0x51, 0x51, 0x19, 0x01, 0x00
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    };
+    const unsigned char lut_partial_update[] =
+    {
+        0x10, 0x18, 0x18, 0x08, 0x18, 0x18, 0x08, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x13, 0x14, 0x44, 0x12, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+    };
+    for (int i=0; i<30; i++)
+      _transfer(lut_full_update[i]);
+  }
   _transferCommand(0x22);
   //_transfer(0xcc); // skip temperature load (-5ms)
   _transfer(0xfc);
