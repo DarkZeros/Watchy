@@ -52,7 +52,13 @@ void WatchyDisplay::setDarkBorder(bool dark) {
   darkBorder = dark;
   _startTransfer();
   _transferCommand(0x3C); // BorderWavefrom
-  _transfer(dark ? 0x02 : 0x05);
+  // 0b11xxxxxx = HIZ (Ignore)
+  // 0b10xxxxxx = VCOM (LightGrey)
+  // 0b01AAxxxx = Fix Level: 00=VSS(DarkGrey), 01=VSH1(Black), 10=VSL(White), 11=VSH2(Black)
+  // 0b00xxxxAA = GS Transition: 00=LUT0(Black), 01=LUT1(white), 10=LUT2(??), 11=LUT3(??)
+  //_transfer(0b01100000);
+  //_transfer(dark ? 0x70 : 0x60); // Fix Level VSH2/VSL
+  _transfer(dark ? 0x00 : 0x01); // GS Transition LUT0/LUT1
   _endTransfer();
 }
 
