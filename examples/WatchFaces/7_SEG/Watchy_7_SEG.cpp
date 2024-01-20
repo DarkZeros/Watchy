@@ -40,6 +40,11 @@ void Watchy7SEG::drawTime(){
         display.print("0");
     }
     display.println(currentTime.Minute);
+    display.setCursor(105, 53*2+5*2);
+    if(currentTime.Second < 10){
+        display.print("0");
+    }
+    display.println(currentTime.Second);
 }
 
 void Watchy7SEG::drawDate(){
@@ -69,6 +74,9 @@ void Watchy7SEG::drawDate(){
     display.println(currentTime.Day);
     display.setCursor(5, 150);
     display.println(tmYearToCalendar(currentTime.Year));// offset from 1970, since year is stored in uint8_t
+
+    // display.setCursor(5, 180);
+    // display.println( esp_sleep_get_touchpad_wakeup_status());// offset from 1970, since year is stored in uint8_t
 }
 void Watchy7SEG::drawSteps(){
     // reset step counter at midnight

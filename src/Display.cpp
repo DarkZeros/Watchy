@@ -27,7 +27,7 @@ void WatchyDisplay::busyCallback(const void *) {
 }
 
 WatchyDisplay::WatchyDisplay() :
-  GxEPD2_EPD(DISPLAY_CS, DISPLAY_DC, DISPLAY_RES, DISPLAY_BUSY, HIGH, 10000000, WIDTH, HEIGHT, panel, hasColor, hasPartialUpdate, hasFastPartialUpdate)
+  GxEPD2_EPD(DISPLAY_CS, DISPLAY_RES, DISPLAY_DC, DISPLAY_BUSY, HIGH, 10000000, WIDTH, HEIGHT, panel, hasColor, hasPartialUpdate, hasFastPartialUpdate)
 {
   // Setup callback and SPI by default
   selectSPI(SPI, SPISettings(20000000, MSBFIRST, SPI_MODE0));

@@ -1,5 +1,7 @@
 #include "Watchy.h"
 
+#include "driver/touch_sensor.h"
+
 WatchyRTC Watchy::RTC;
 GxEPD2_BW<WatchyDisplay, WatchyDisplay::HEIGHT> Watchy::display(
     WatchyDisplay{});
@@ -25,10 +27,24 @@ void Watchy::init(String datetime) {
   gettimeofday(&tv, NULL);
   breakTime(tv.tv_sec, currentTime);
 
+  ESP_LOGE("", "start");
+
+  #define THRESHOLD 40
+  /*touchSleepWakeUpEnable(4,THRESHOLD);
+  touchSleepWakeUpEnable(2,THRESHOLD);
+  touchSleepWakeUpEnable(12,THRESHOLD);
+  touchSleepWakeUpEnable(14,THRESHOLD);
+  touch_pad_set_meas_time(2*4096, 1024);*/
+
+  ESP_LOGE("", "done touch");
+
   // Init the display since is almost sure we will use it
   display.epd2.initWatchy();
+  //ESP_LOGE("", "A");
 
   switch (wakeup_reason) {
+  case ESP_SLEEP_WAKEUP_TOUCHPAD:
+    ESP_LOGE("", "Touch! %d", esp_sleep_get_touchpad_wakeup_status());
   case ESP_SLEEP_WAKEUP_TIMER: // RTC Timer
   case ESP_SLEEP_WAKEUP_EXT0: // RTC Alarm
     //RTC.read(currentTime);
@@ -83,10 +99,100 @@ void Watchy::init(String datetime) {
       gpio_set_level((gpio_num_t)13, 1);
       gpio_hold_en((gpio_num_t)13);
       gpio_deep_sleep_hold_en();
+    // Set touch sensors
+
+      // #define THRESHOLD 40
+      // touchSleepWakeUpEnable(4,THRESHOLD);
+      // touchSleepWakeUpEnable(2,THRESHOLD);
+      // touchSleepWakeUpEnable(12,THRESHOLD);
+      // touchSleepWakeUpEnable(14,THRESHOLD);
+      // touch_pad_set_meas_time(2*4096, 1024);
+
+      // touch_pad_init();
+      // touch_pad_config(TOUCH_PAD_NUM0, 40);
+      /* Denoise setting at TouchSensor 0. */
+      // touch_pad_denoise_t denoise = {
+      //     /* The bits to be cancelled are determined according to the noise level. */
+      //     .grade = TOUCH_PAD_DENOISE_BIT4,
+      //     .cap_level = TOUCH_PAD_DENOISE_CAP_L4,
+      // };
+      // touch_pad_denoise_set_config(&denoise);
+      // touch_pad_denoise_enable();
+
+      // /* Filter setting */
+      // touch_filter_config_t filter_info = {
+      //     .mode = TOUCH_PAD_FILTER_IIR_16,
+      //     .debounce_cnt = 1,      // 1 time count.
+      //     .noise_thr = 0,         // 50%
+      //     .jitter_step = 4,       // use for jitter mode.
+      //     .smh_lvl = TOUCH_PAD_SMOOTH_IIR_2,        
+      // };
+      // touch_pad_filter_set_config(&filter_info);
+      // touch_pad_filter_enable();
+
+      // /* Set sleep touch pad. */
+      // touch_pad_sleep_channel_enable(TOUCH_PAD_NUM0, true);
+      // touch_pad_sleep_channel_enable_proximity(TOUCH_PAD_NUM0, false);
+
+      // /* Enable touch sensor clock. Work mode is "timer trigger". */
+      // touch_pad_set_fsm_mode(TOUCH_FSM_MODE_TIMER);
+      // touch_pad_fsm_start();
+      // vTaskDelay(100 / portTICK_RATE_MS);
+      /* read sleep touch pad value */
+      // uint32_t touch_value;
+      // touch_pad_sleep_channel_read_smooth(TOUCH_PAD_NUM0, &touch_value);
+      //     touch_pad_sleep_set_threshold(TOUCH_PAD_NUM0, touch_value * 0.1); //10%
+      // ESP_LOGI(TAG, "test init: touch pad [%d] slp %d, thresh %d",
+      //     TOUCH_PAD_NUM0, touch_value, (uint32_t)(touch_value * 0.1));
+
+      // uint32_t sleep_time_in_ms = 1000;
+      // uint32_t touchpad_sleep_ticks = (uint32_t)((uint64_t)sleep_time_in_ms * rtc_clk_slow_freq_get_hz() / 1000);
+
+      // uint16_t oldslp, oldmeas;
+      // touch_pad_get_meas_time(&oldslp, &oldmeas);
+      // ESP_LOGI(TAG, "oldslp=%d  newslp=%d oldmeas=%d", oldslp, touchpad_sleep_ticks, oldmeas);
+
+      // touch_pad_set_meas_time(touchpad_sleep_ticks, 500);
+
+      ESP_LOGI(TAG, "Enabling touch pad wakeup");
+      esp_sleep_enable_touchpad_wakeup();
+
+      // Enable timer wake up 
+      const uint64_t wakeup_time_sec = 3600*24;         // 1 day
+      ESP_LOGI(TAG, "Enabling timer wakeup, %llds", wakeup_time_sec);
+      esp_sleep_enable_timer_wakeup(wakeup_time_sec * 1000000);
+
+      esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_PERIPH, ESP_PD_OPTION_ON);
     break;
   }
   deepSleep();
 }
+
+void touchSleepWakeUpEnable2(uint8_t pin, touch_value_t threshold)
+{
+    int8_t pad = digitalPinToTouchChannel(pin);
+    ESP_LOGE("","st");
+    if(pad < 0){
+        log_e(" No touch pad on selected pin!");
+        return;
+    }
+    __touchInit();
+    ESP_LOGE("","init1");
+    __touchChannelInit(pad);
+    ESP_LOGE("","init2");
+
+    #if SOC_TOUCH_VERSION_1        // Only for ESP32 SoC
+    touch_pad_set_thresh(pad, threshold);
+   
+    #elif SOC_TOUCH_VERSION_2
+    touch_pad_sleep_channel_enable(pad, true);
+    touch_pad_sleep_set_threshold(pad, threshold);
+    ESP_LOGE("","done");
+    #endif 
+    esp_sleep_enable_touchpad_wakeup();
+    ESP_LOGE("","wake");
+}
+
 void Watchy::deepSleep() {
   display.hibernate();
   //RTC.clearAlarm();        // resets the alarm flag in the RTC
@@ -98,6 +204,23 @@ void Watchy::deepSleep() {
       continue;
     pinMode(i, INPUT);
   }
+  
+    #define THRESHOLD 40
+    // touchSleepWakeUpEnable(4,THRESHOLD);
+    // touchSleepWakeUpEnable(2,THRESHOLD);
+
+    // touchSleepWakeUpEnable(12,THRESHOLD);
+    // touchSleepWakeUpEnable(14,THRESHOLD);
+    // touch_pad_set_meas_time(2*4096, 1024);
+    // uint16_t interval = 0, cycle = 0;
+    // touch_pad_get_meas_time(&cycle, &interval);
+
+    touchSleepWakeUpEnable2(4,THRESHOLD);
+
+  
+  // ESP_LOGE("", "touch cycle %d %d", cycle, interval);
+  ESP_LOGE("", "sleep");
+
   // esp_sleep_enable_ext0_wakeup((gpio_num_t)RTC_INT_PIN,
   //                              0); // enable deep sleep wake on RTC interrupt
   // esp_sleep_enable_ext1_wakeup(
@@ -619,7 +742,11 @@ void Watchy::showWatchFace(bool partialRefresh) {
   display.setFullWindow();
   // At this point it is sure we are going to update
   display.epd2.asyncPowerOn();
+  //ESP_LOGE("", "Post Async");
+
   drawWatchFace();
+  //ESP_LOGE("", "Post Draw");
+
   display.display(partialRefresh); // partial refresh
   guiState = WATCHFACE_STATE;
 }
