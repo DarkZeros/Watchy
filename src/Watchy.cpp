@@ -37,6 +37,84 @@ void setVoltage(bool high) {
   gpio_deep_sleep_hold_en();
 }
 
+#include "driver/touch_sensor.h"
+
+void setUpTouch() {
+  // Set up touch pad before going back to sleep
+  #define THRESHOLD 40
+  touch_pad_init();
+  //touch_pad_set_voltage(TOUCH_HVOLT_2V7, TOUCH_LVOLT_0V5, TOUCH_HVOLT_ATTEN_0V); 
+  touch_pad_set_measurement_clock_cycles(1024);
+  touch_pad_set_measurement_interval(2*4096);
+  //touch_pad_intr_enable();  // returns ESP_OK
+  esp_sleep_enable_touchpad_wakeup();
+  touch_pad_config((touch_pad_t)0, THRESHOLD);
+  touch_pad_config((touch_pad_t)2, THRESHOLD);
+  touch_pad_config((touch_pad_t)5, THRESHOLD);
+  touch_pad_config((touch_pad_t)6, THRESHOLD);
+  // Touch Sensor Timer initiated
+  touch_pad_set_fsm_mode(TOUCH_FSM_MODE_TIMER);   // returns ESP_OK
+  uint16_t mask = (1 << 0)|(1 << 2)|(1 << 5)|(1 << 6);
+  touch_pad_set_group_mask(mask, mask, mask);
+  //touch_pad_filter_start(10);
+
+  // touch_pad_init();
+      // touch_pad_config(TOUCH_PAD_NUM0, 40);
+      /* Denoise setting at TouchSensor 0. */
+      // touch_pad_denoise_t denoise = {
+      //     /* The bits to be cancelled are determined according to the noise level. */
+      //     .grade = TOUCH_PAD_DENOISE_BIT4,
+      //     .cap_level = TOUCH_PAD_DENOISE_CAP_L4,
+      // };
+      // touch_pad_denoise_set_config(&denoise);
+      // touch_pad_denoise_enable();
+
+      // /* Filter setting */
+      // touch_filter_config_t filter_info = {
+      //     .mode = TOUCH_PAD_FILTER_IIR_16,
+      //     .debounce_cnt = 1,      // 1 time count.
+      //     .noise_thr = 0,         // 50%
+      //     .jitter_step = 4,       // use for jitter mode.
+      //     .smh_lvl = TOUCH_PAD_SMOOTH_IIR_2,        
+      // };
+      // touch_pad_filter_set_config(&filter_info);
+      // touch_pad_filter_enable();
+
+      // /* Set sleep touch pad. */
+      // touch_pad_sleep_channel_enable(TOUCH_PAD_NUM0, true);
+      // touch_pad_sleep_channel_enable_proximity(TOUCH_PAD_NUM0, false);
+
+      // /* Enable touch sensor clock. Work mode is "timer trigger". */
+      // touch_pad_set_fsm_mode(TOUCH_FSM_MODE_TIMER);
+      // touch_pad_fsm_start();
+      // vTaskDelay(100 / portTICK_RATE_MS);
+      /* read sleep touch pad value */
+      // uint32_t touch_value;
+      // touch_pad_sleep_channel_read_smooth(TOUCH_PAD_NUM0, &touch_value);
+      //     touch_pad_sleep_set_threshold(TOUCH_PAD_NUM0, touch_value * 0.1); //10%
+      // ESP_LOGI(TAG, "test init: touch pad [%d] slp %d, thresh %d",
+      //     TOUCH_PAD_NUM0, touch_value, (uint32_t)(touch_value * 0.1));
+
+      // uint32_t sleep_time_in_ms = 1000;
+      // uint32_t touchpad_sleep_ticks = (uint32_t)((uint64_t)sleep_time_in_ms * rtc_clk_slow_freq_get_hz() / 1000);
+
+      // uint16_t oldslp, oldmeas;
+      // touch_pad_get_meas_time(&oldslp, &oldmeas);
+      // ESP_LOGI(TAG, "oldslp=%d  newslp=%d oldmeas=%d", oldslp, touchpad_sleep_ticks, oldmeas);
+
+      // touch_pad_set_meas_time(touchpad_sleep_ticks, 500);
+
+      // ESP_LOGI(TAG, "Enabling touch pad wakeup");
+      // esp_sleep_enable_touchpad_wakeup();
+
+      // // Enable timer wake up 
+      // const uint64_t wakeup_time_sec = 3600*24;         // 1 day
+      // ESP_LOGI(TAG, "Enabling timer wakeup, %llds", wakeup_time_sec);
+      // esp_sleep_enable_timer_wakeup(wakeup_time_sec * 1000000);
+
+      // esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_PERIPH, ESP_PD_OPTION_ON);
+}
+
 void Watchy::init(String datetime) {
   esp_sleep_wakeup_cause_t wakeup_reason;
   wakeup_reason = esp_sleep_get_wakeup_cause(); // get wake up reason
@@ -105,6 +183,9 @@ void Watchy::deepSleep() {
   esp_sleep_enable_ext1_wakeup(
       BTN_PIN_MASK,
       ESP_EXT1_WAKEUP_ANY_HIGH); // enable deep sleep wake on button press
+  
+  // Set up touch pad before going back to sleep
+  setUpTouch();
   esp_deep_sleep_start();
 }
 
