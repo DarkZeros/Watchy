@@ -55,7 +55,7 @@ void Watchy::init(String datetime) {
       if (settings.vibrateOClock) {
         if (currentTime.Minute == 0) {
           // The RTC wakes us up once per minute
-          vibMotor(75, 4);
+          // vibMotor(75, 4);
         }
       }
       break;
@@ -80,7 +80,7 @@ void Watchy::init(String datetime) {
     RTC.read(currentTime);
     RTC.read(bootTime);
     showWatchFace(false); // full update on reset
-    vibMotor(75, 4);
+    // vibMotor(75, 4);
     // For some reason, seems to be enabled on first boot
     esp_sleep_disable_wakeup_source(ESP_SLEEP_WAKEUP_ALL);
     // Select default voltage
