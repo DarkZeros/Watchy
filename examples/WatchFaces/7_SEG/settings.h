@@ -9,9 +9,10 @@
 #define TEMP_LANG "en"
 #define WEATHER_UPDATE_INTERVAL 30 //must be greater than 5, measured in minutes
 //NTP Settings
-#define NTP_SERVER "pool.ntp.org"
-#define GMT_OFFSET_SEC 3600 * -5 //New York is UTC -5 EST, -4 EDT, will be overwritten by weather data
-
+//#define NTP_SERVER "pool.ntp.org"
+#define NTP_SERVER "time.nist.gov"
+//#define GMT_OFFSET_SEC 3600 * -5 //New York is UTC -5 EST, -4 EDT, will be overwritten by weather data
+#define GMT_OFFSET_SEC 0
 watchySettings settings{
     .cityID = CITY_ID,
     .weatherAPIKey = OPENWEATHERMAP_APIKEY,

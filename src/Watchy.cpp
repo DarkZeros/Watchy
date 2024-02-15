@@ -161,7 +161,11 @@ void Watchy::init(String datetime) {
     // vibMotor(75, 4);
     // For some reason, seems to be enabled on first boot
     esp_sleep_disable_wakeup_source(ESP_SLEEP_WAKEUP_ALL);
-    // Select default voltage
+    // Select default voltage 2.9V for WiFi
+    setVoltage(true);
+    // Update NTP
+    showSyncNTP();
+    // Select default voltage 2.6V
     setVoltage(false);
     break;
   }
@@ -954,7 +958,7 @@ void Watchy::_configModeCallback(WiFiManager *myWiFiManager) {
 
 bool Watchy::connectWiFi() {
   if (WL_CONNECT_FAILED ==
-      WiFi.begin()) { // WiFi not setup, you can also use hard coded credentials
+      WiFi.begin("VM3616562", "cchdxf8jRzgkwxrd")) { // WiFi not setup, you can also use hard coded credentials
                       // with WiFi.begin(SSID,PASS);
     WIFI_CONFIGURED = false;
   } else {
@@ -1118,7 +1122,7 @@ void Watchy::showSyncNTP() {
   }
   display.display(true); // full refresh
   delay(3000);
-  showMenu(menuIndex, false);
+  // showMenu(menuIndex, false);
 }
 
 bool Watchy::syncNTP() { // NTP sync - call after connecting to WiFi and
@@ -1141,6 +1145,10 @@ bool Watchy::syncNTP(long gmt, String ntpServer) {
     return false; // NTP sync failed
   }
   tmElements_t tm;
+  struct timeval tt = {};
+  tt.tv_sec = timeClient.getEpochTime();
+  settimeofday(&tt, 0);
+  // ESP_LOGE("", "%lu", timeClient.getEpochTime());
   breakTime((time_t)timeClient.getEpochTime(), tm);
   // RTC.set(tm);
   return true;
