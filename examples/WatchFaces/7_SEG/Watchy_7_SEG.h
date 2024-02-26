@@ -17,6 +17,12 @@ class Watchy7SEG : public Watchy{
         void drawSteps();
         void drawWeather();
         void drawBattery();
+
+        void drawEllipse(int x, int y, uint8_t width, uint8_t height, uint16_t on);
+        void drawMoonFast(float p, int x, int y, uint8_t r, uint16_t on, uint16_t off);
+        void drawMoon(float p, uint16_t x, uint16_t y, uint16_t radius, uint16_t on, uint16_t off);
+        void drawEllipseDifference(int x, int y, uint8_t width1, uint8_t width2, uint8_t height, bool big, uint16_t on);
+        //void drawEllipseDifference(int x, int y, uint8_t width1, uint8_t height1, uint8_t width2, uint8_t height2, uint16_t on);
 };
 
 #endif
