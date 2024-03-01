@@ -124,7 +124,13 @@ void Watchy::init(String datetime) {
   // Init the display since is almost sure we will use it
   display.epd2.initWatchy();
 
+  // Populate currentTime
+  struct timeval tv;
+  gettimeofday(&tv, NULL);
+  breakTime(tv.tv_sec, currentTime);
+
   switch (wakeup_reason) {
+  case ESP_SLEEP_WAKEUP_TIMER: // Internal Timer
   case ESP_SLEEP_WAKEUP_EXT0: // RTC Alarm
     // RTC.read(currentTime);
     switch (guiState) {
@@ -190,6 +196,13 @@ void Watchy::deepSleep() {
   
   // Set up touch pad before going back to sleep
   // setUpTouch();
+
+  // Calculate how much to sleep
+  struct timeval tv;
+  gettimeofday(&tv, NULL);
+  breakTime(tv.tv_sec, currentTime);
+  // esp_sleep_enable_timer_wakeup(1000000 - tv.tv_usec);
+  esp_sleep_enable_timer_wakeup((60 - currentTime.Second) * 1000000);
   esp_deep_sleep_start();
 }
 
