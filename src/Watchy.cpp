@@ -118,15 +118,15 @@ void setUpTouch() {
 void Watchy::init(String datetime) {
   esp_sleep_wakeup_cause_t wakeup_reason;
   wakeup_reason = esp_sleep_get_wakeup_cause(); // get wake up reason
-  Wire.begin(SDA, SCL);                         // init i2c
-  RTC.init();
+  // Wire.begin(SDA, SCL);                         // init i2c
+  // RTC.init();
 
   // Init the display since is almost sure we will use it
   display.epd2.initWatchy();
 
   switch (wakeup_reason) {
   case ESP_SLEEP_WAKEUP_EXT0: // RTC Alarm
-    RTC.read(currentTime);
+    // RTC.read(currentTime);
     switch (guiState) {
     case WATCHFACE_STATE:
       showWatchFace(true); // partial updates on tick
@@ -152,11 +152,11 @@ void Watchy::init(String datetime) {
     handleButtonPress();
     break;
   default: // reset
-    RTC.config(datetime);
-    _bmaConfig();
+    // RTC.config(datetime);
+    // _bmaConfig();
     gmtOffset = settings.gmtOffset;
-    RTC.read(currentTime);
-    RTC.read(bootTime);
+    // RTC.read(currentTime);
+    // RTC.read(bootTime);
     showWatchFace(false); // full update on reset
     // vibMotor(75, 4);
     // For some reason, seems to be enabled on first boot
@@ -169,7 +169,7 @@ void Watchy::init(String datetime) {
 }
 void Watchy::deepSleep() {
   display.hibernate();
-  RTC.clearAlarm();        // resets the alarm flag in the RTC
+  // RTC.clearAlarm();        // resets the alarm flag in the RTC
 
   // Set GPIOs 0-39 to input to avoid power leaking out
   const uint64_t ignore = 0b11110001000000110000100111000010; // Ignore some GPIOs due to resets
@@ -178,14 +178,14 @@ void Watchy::deepSleep() {
       continue;
     pinMode(i, INPUT);
   }
-  esp_sleep_enable_ext0_wakeup((gpio_num_t)RTC_INT_PIN,
-                               0); // enable deep sleep wake on RTC interrupt
-  esp_sleep_enable_ext1_wakeup(
-      BTN_PIN_MASK,
-      ESP_EXT1_WAKEUP_ANY_HIGH); // enable deep sleep wake on button press
+  // esp_sleep_enable_ext0_wakeup((gpio_num_t)RTC_INT_PIN,
+  //                              0); // enable deep sleep wake on RTC interrupt
+  // esp_sleep_enable_ext1_wakeup(
+  //     BTN_PIN_MASK,
+  //     ESP_EXT1_WAKEUP_ANY_HIGH); // enable deep sleep wake on button press
   
   // Set up touch pad before going back to sleep
-  setUpTouch();
+  // setUpTouch();
   esp_deep_sleep_start();
 }
 
@@ -230,7 +230,7 @@ void Watchy::handleButtonPress() {
   // Back Button
   else if (wakeupBit & BACK_BTN_MASK) {
     if (guiState == MAIN_MENU_STATE) { // exit to watch face if already in menu
-      RTC.read(currentTime);
+      // RTC.read(currentTime);
       showWatchFace(false);
     } else if (guiState == APP_STATE) {
       showMenu(menuIndex, false); // exit to menu if already in app
@@ -312,7 +312,7 @@ void Watchy::handleButtonPress() {
         lastTimeout = millis();
         if (guiState ==
             MAIN_MENU_STATE) { // exit to watch face if already in menu
-          RTC.read(currentTime);
+          // RTC.read(currentTime);
           showWatchFace(false);
           break; // leave loop
         } else if (guiState == APP_STATE) {
@@ -428,7 +428,7 @@ void Watchy::showAbout() {
   display.println("V");
 
   display.print("Uptime: ");
-  RTC.read(currentTime);
+  // RTC.read(currentTime);
   time_t b = makeTime(bootTime);
   time_t c = makeTime(currentTime);
   int totalSeconds = c-b;
@@ -473,7 +473,7 @@ void Watchy::setTime() {
 
   guiState = APP_STATE;
 
-  RTC.read(currentTime);
+  // RTC.read(currentTime);
 
   int8_t minute = currentTime.Minute;
   int8_t hour   = currentTime.Hour;
@@ -620,7 +620,7 @@ void Watchy::setTime() {
   tm.Minute = minute;
   tm.Second = 0;
 
-  RTC.set(tm);
+  // RTC.set(tm);
 
   showMenu(menuIndex, false);
 }
@@ -1092,7 +1092,7 @@ void Watchy::showSyncNTP() {
       display.println("NTP Sync Success\n");
       display.println("Current Time Is:");
 
-      RTC.read(currentTime);
+      // RTC.read(currentTime);
 
       display.print(tmYearToCalendar(currentTime.Year));
       display.print("/");
@@ -1142,6 +1142,6 @@ bool Watchy::syncNTP(long gmt, String ntpServer) {
   }
   tmElements_t tm;
   breakTime((time_t)timeClient.getEpochTime(), tm);
-  RTC.set(tm);
+  // RTC.set(tm);
   return true;
 }
