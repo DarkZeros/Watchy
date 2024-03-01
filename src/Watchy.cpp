@@ -121,6 +121,8 @@ void Watchy::init(String datetime) {
   // Wire.begin(SDA, SCL);                         // init i2c
   // RTC.init();
 
+  ESP_LOGE("","start %lld", esp_timer_get_time());
+
   // Init the display since is almost sure we will use it
   display.epd2.initWatchy();
 
@@ -196,6 +198,8 @@ void Watchy::deepSleep() {
   
   // Set up touch pad before going back to sleep
   // setUpTouch();
+
+  ESP_LOGE("","sleep %lld", esp_timer_get_time());
 
   // Calculate how much to sleep
   struct timeval tv;
