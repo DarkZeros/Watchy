@@ -15,6 +15,9 @@ RTC_DATA_ATTR long gmtOffset = 0;
 RTC_DATA_ATTR bool alreadyInMenu         = true;
 RTC_DATA_ATTR tmElements_t bootTime;
 
+#include "nvs_flash.h"
+#include "nvs.h"
+
 #include "driver/gpio.h"
 
 // Set V2.9 (1) / 2.6V (0)
@@ -41,11 +44,12 @@ void setVoltage(bool high) {
 
 void setUpTouch() {
   // Set up touch pad before going back to sleep
-  #define THRESHOLD 40
+  /*#define THRESHOLD 50
   touch_pad_init();
-  //touch_pad_set_voltage(TOUCH_HVOLT_2V7, TOUCH_LVOLT_0V5, TOUCH_HVOLT_ATTEN_0V); 
+  touch_pad_set_voltage(TOUCH_HVOLT_2V5, TOUCH_LVOLT_0V5, TOUCH_HVOLT_ATTEN_0V); 
   touch_pad_set_measurement_clock_cycles(1024);
   touch_pad_set_measurement_interval(2*4096);
+  // touch_pad_set_trigger_mode(TOUCH_TRIGGER_BELOW);
   //touch_pad_intr_enable();  // returns ESP_OK
   esp_sleep_enable_touchpad_wakeup();
   touch_pad_config((touch_pad_t)0, THRESHOLD);
@@ -56,6 +60,11 @@ void setUpTouch() {
   touch_pad_set_fsm_mode(TOUCH_FSM_MODE_TIMER);   // returns ESP_OK
   uint16_t mask = (1 << 0)|(1 << 2)|(1 << 5)|(1 << 6);
   touch_pad_set_group_mask(mask, mask, mask);
+
+  while (true) {
+    delay(1000);
+    ESP_LOGE("touch", "%d %d %d %d", touchRead(T0), touchRead(T2), touchRead(T5), touchRead(T6));
+  }*/
   //touch_pad_filter_start(10);
 
   // touch_pad_init();
@@ -126,12 +135,17 @@ void Watchy::init(String datetime) {
   // Init the display since is almost sure we will use it
   display.epd2.initWatchy();
 
+  // Set rotation
+  display.setRotation(2);
+
   // Populate currentTime
   struct timeval tv;
   gettimeofday(&tv, NULL);
   breakTime(tv.tv_sec, currentTime);
 
   switch (wakeup_reason) {
+  case ESP_SLEEP_WAKEUP_TOUCHPAD: // Touch!
+    ESP_LOGE("", "Touch %d", esp_sleep_get_touchpad_wakeup_status());
   case ESP_SLEEP_WAKEUP_TIMER: // Internal Timer
   case ESP_SLEEP_WAKEUP_EXT0: // RTC Alarm
     // RTC.read(currentTime);
@@ -171,7 +185,8 @@ void Watchy::init(String datetime) {
     esp_sleep_disable_wakeup_source(ESP_SLEEP_WAKEUP_ALL);
     // Select default voltage 2.9V for WiFi
     setVoltage(true);
-    // Update NTP
+    // We need Arduino for this (WiFi + NTP)
+    initArduino();
     showSyncNTP();
     // Select default voltage 2.6V
     setVoltage(false);
@@ -197,7 +212,7 @@ void Watchy::deepSleep() {
   //     ESP_EXT1_WAKEUP_ANY_HIGH); // enable deep sleep wake on button press
   
   // Set up touch pad before going back to sleep
-  // setUpTouch();
+  setUpTouch();
 
   ESP_LOGE("","sleep %lld", esp_timer_get_time());
 

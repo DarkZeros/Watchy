@@ -20,6 +20,7 @@ void Watchy7SEG::drawWatchFace(){
     // if(BLE_CONFIGURED){
     //     display.drawBitmap(100, 75, bluetooth, 13, 21, DARKMODE ? GxEPD_WHITE : GxEPD_BLACK);
     // }
+    display.print(getBatteryVoltage());
     display.drawCircle(150, 100, 28, GxEPD_BLACK);
     display.fillCircle(150, 100, 25, GxEPD_BLACK);
     //display.fillCircleHelper(150, 100, 25, 0b0011, 10, GxEPD_WHITE);

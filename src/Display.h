@@ -91,7 +91,7 @@ class WatchyDisplay : public GxEPD2_EPD
     void _Update_Full();
     void _Update_Part();
 
-    void _reset();
+    virtual void _reset();
 
     void _transferCommand(uint8_t command);
 };

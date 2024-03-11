@@ -331,8 +331,10 @@ void WatchyDisplay::hibernate()
   //_PowerOff(); // Not needed before entering deep sleep
   if (_rst >= 0)
   {
-    _writeCommand(0x10); // deep sleep mode
-    _writeData(0x1);     // enter deep sleep
+    _startTransfer();
+    _transferCommand(0x10); // deep sleep mode
+    _transfer(0x1);         // enter deep sleep
+    _endTransfer();
     _hibernating = true;
   }
 }
@@ -449,7 +451,6 @@ void WatchyDisplay::_reset()
     GxEPD2_EPD::_reset();
     return;
   }
-
   digitalWrite(_rst, LOW);
   pinMode(_rst, OUTPUT);
   delay(_reset_duration);

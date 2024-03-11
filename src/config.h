@@ -11,7 +11,7 @@
 #pragma message "Hardware revision is not defined at the project level, please define in config.h. Defaulting to ARDUINO_WATCHY_V20"
 
 //Change to your board version
-#define ARDUINO_WATCHY_V10
+#define ARDUINO_WATCHY_V20
 
 #define MENU_BTN_PIN 26
 #define BACK_BTN_PIN 25
