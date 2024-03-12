@@ -1041,7 +1041,7 @@ void Watchy::updateFWBegin() {
   display.println("connection...");
   display.display(false); // full refresh
 
-  BLE BT;
+ /* BLE BT;
   BT.begin("Watchy BLE OTA");
   int prevStatus = -1;
   int currentStatus;
@@ -1106,7 +1106,7 @@ void Watchy::updateFWBegin() {
     }
     delay(100);
   }
-
+*/
   // turn off radios
   WiFi.mode(WIFI_OFF);
   btStop();

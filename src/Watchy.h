@@ -13,7 +13,7 @@
 #include "DSEG7_Classic_Bold_53.h"
 #include "Display.h"
 #include "WatchyRTC.h"
-#include "BLE.h"
+// #include "BLE.h"
 #include "bma.h"
 #include "config.h"
 
