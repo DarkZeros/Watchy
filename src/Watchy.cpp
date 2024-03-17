@@ -19,6 +19,7 @@ RTC_DATA_ATTR tmElements_t bootTime;
 #include "nvs.h"
 
 #include "driver/gpio.h"
+#include "esp_private/esp_clk.h"
 
 // Set V2.9 (1) / 2.6V (0)
 void setVoltage(bool high) {
@@ -130,7 +131,7 @@ void Watchy::init(String datetime) {
   // Wire.begin(SDA, SCL);                         // init i2c
   // RTC.init();
 
-  ESP_LOGE("","start %lld", esp_timer_get_time());
+  // ESP_LOGE("","start %lld", esp_timer_get_time());
 
   // Init the display since is almost sure we will use it
   display.epd2.initWatchy();
@@ -180,6 +181,11 @@ void Watchy::init(String datetime) {
     // RTC.read(currentTime);
     // RTC.read(bootTime);
     showWatchFace(false); // full update on reset
+
+    // Calibrate RTC using NVS storage values
+    // esp_clk_slowclk_cal_set(cal_val);
+    ESP_LOGE("", "%lu", esp_clk_slowclk_cal_get());
+
     // vibMotor(75, 4);
     // For some reason, seems to be enabled on first boot
     esp_sleep_disable_wakeup_source(ESP_SLEEP_WAKEUP_ALL);
@@ -192,6 +198,7 @@ void Watchy::init(String datetime) {
     setVoltage(false);
     break;
   }
+      ESP_LOGE("", "%lu", esp_clk_slowclk_cal_get());
   deepSleep();
 }
 void Watchy::deepSleep() {
